@@ -1,0 +1,222 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Nelya Sign-up Harness · Case Study · Faiz Khan</title>
+<meta name="description" content="Case study: a production agent harness that takes a contractor from a first text to a live AI front desk. Claude Agent SDK in Cloudflare Containers, with every business rule in code.">
+<meta property="og:title" content="Case study: Nelya Sign-up Harness">
+<meta property="og:description" content="An AI agent that sells, collects payment, sets up a phone number and launches the service by text, with every rule enforced in code rather than in the prompt.">
+<meta property="og:url" content="https://er-faiz-khan.github.io/nelya-harness/">
+<meta property="og:type" content="article">
+<meta property="og:image" content="https://er-faiz-khan.github.io/img/og-nelya-harness.png">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="627">
+<meta name="twitter:card" content="summary_large_image">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+  :root { --accent: #1F4E79; --ink: #1A1A1A; --body: #44433F; --muted: #76756F; --line: #E5E4DD; }
+  * { box-sizing: border-box; }
+  body { margin: 0; font-family: 'Inter', system-ui, sans-serif; background: #FAFAF8; color: var(--ink); }
+  a { color: var(--accent); text-decoration: none; }
+  a:hover { text-decoration: underline; }
+  .wrap { max-width: 820px; margin: 0 auto; padding: 0 32px; }
+  .back { display: inline-block; margin-top: 40px; font-size: 15px; font-weight: 600; }
+  h1 { margin: 20px 0 12px; font-size: 38px; font-weight: 800; letter-spacing: -0.5px; line-height: 1.15; }
+  .lede { margin: 0 0 20px; font-size: 19px; line-height: 1.55; color: var(--body); }
+  .meta { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 8px; }
+  .tag { font-size: 13px; font-weight: 500; color: var(--body); background: #F2F1EA; padding: 4px 10px; border-radius: 6px; }
+  .badge { font-size: 13px; font-weight: 600; color: #8A6400; background: #FBF0D6; padding: 5px 12px; border-radius: 999px; }
+  h2 { margin: 48px 0 14px; font-size: 13px; font-weight: 700; letter-spacing: 1.2px; text-transform: uppercase; color: var(--muted); }
+  h3 { margin: 26px 0 8px; font-size: 18px; font-weight: 700; }
+  p, li { font-size: 16.5px; line-height: 1.65; color: var(--body); }
+  p { margin: 0 0 14px; }
+  ul { margin: 0 0 14px; padding-left: 22px; }
+  li { margin-bottom: 6px; }
+  strong { color: var(--ink); }
+  code { font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 14px; background: #F2F1EA; padding: 1px 6px; border-radius: 5px; }
+  .stats { display: grid; grid-template-columns: repeat(auto-fit, minmax(170px, 1fr)); gap: 14px; margin: 8px 0 4px; }
+  .stat { background: #fff; border: 1px solid var(--line); border-radius: 14px; padding: 18px 18px 16px; }
+  .stat .n { margin: 0 0 4px; font-size: 26px; font-weight: 800; color: var(--accent); }
+  .stat .l { margin: 0; font-size: 14px; line-height: 1.45; color: var(--muted); }
+  .figure { background: #fff; border: 1px solid var(--line); border-radius: 16px; padding: 20px; margin: 10px 0 6px; overflow-x: auto; }
+  .caption { font-size: 14px; color: var(--muted); margin-top: 8px; }
+  table { width: 100%; border-collapse: collapse; font-size: 15px; background: #fff; border: 1px solid var(--line); border-radius: 12px; overflow: hidden; }
+  th, td { text-align: left; padding: 10px 12px; border-bottom: 1px solid var(--line); vertical-align: top; color: var(--body); }
+  th { background: #F5F4EE; color: var(--ink); font-weight: 600; }
+  tr:last-child td { border-bottom: none; }
+  .note { background: #F5F4EE; border-left: 3px solid var(--accent); padding: 14px 16px; border-radius: 0 10px 10px 0; margin: 14px 0; }
+  .note p { margin: 0; }
+  footer { margin-top: 56px; padding: 28px 0 72px; border-top: 1px solid var(--line); }
+  footer p { font-size: 15px; color: var(--muted); }
+</style>
+</head>
+<body>
+<main class="wrap">
+  <a class="back" href="../">← Faiz Khan · Portfolio</a>
+
+  <h1>Nelya Sign-up Harness</h1>
+  <p class="lede">An AI agent that takes a contractor from a first text message to a live AI front desk: it qualifies them,
+    collects their details and payment, sets up their phone number and launches the service, all by text.
+    The model handles the conversation. Code enforces every rule.</p>
+  <div class="meta">
+    <span class="badge">Built &amp; tested · staging deploy next</span>
+    <span class="tag">Claude Agent SDK</span>
+    <span class="tag">Model Context Protocol (MCP)</span>
+    <span class="tag">Cloudflare Workers · Containers · D1</span>
+    <span class="tag">Twilio</span>
+    <span class="tag">Stripe</span>
+  </div>
+
+  <h2>The problem</h2>
+  <p><strong>Nelya</strong> is Divoit's missed-call text-back service for contractors. When a plumber or roofer can't pick
+    up, Nelya texts the caller within seconds so the lead isn't lost. The product worked, but <strong>signing up</strong>
+    a contractor was manual. Someone had to collect their details, send a payment link, buy and configure a phone number,
+    walk them through call forwarding on their carrier, and agree the wording customers would see.</p>
+  <p>That is a dozen steps over several days, with money and phone numbers involved. It's a good job for an agent,
+    as long as the agent can't take a step out of order, spend money nobody approved, or tell a contractor
+    something untrue.</p>
+
+  <h2>The approach: the model talks, the code decides</h2>
+  <p>The main design decision: <strong>no business rule lives in the prompt.</strong> The agent can only act
+    through ten narrow tools. Each tool call goes back to the Worker, which checks it against a
+    state machine and the sign-up's saved data before anything happens. If the model tries something it shouldn't,
+    the tool refuses with an explanation, and the refusal is logged.</p>
+
+  <div class="figure" role="img" aria-label="Architecture diagram: contractor texts to Twilio, Twilio to the Cloudflare Worker, the Worker's coordinator wakes an agent container running the Claude Agent SDK; the agent calls tools on the Worker, which enforces guards and talks to D1, Stripe, Twilio and Faiz for approvals.">
+    <svg viewBox="0 0 760 330" width="100%" xmlns="http://www.w3.org/2000/svg" font-family="Inter, system-ui, sans-serif">
+      <defs>
+        <marker id="a" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0,0 L10,5 L0,10 z" fill="#76756F"/></marker>
+      </defs>
+      <!-- contractor -->
+      <rect x="10" y="130" width="120" height="64" rx="12" fill="#F5F4EE" stroke="#E5E4DD"/>
+      <text x="70" y="157" text-anchor="middle" font-size="14" font-weight="700" fill="#1A1A1A">Contractor</text>
+      <text x="70" y="177" text-anchor="middle" font-size="12" fill="#76756F">texts "NELYA"</text>
+      <!-- twilio -->
+      <rect x="160" y="130" width="100" height="64" rx="12" fill="#fff" stroke="#E5E4DD"/>
+      <text x="210" y="157" text-anchor="middle" font-size="14" font-weight="700" fill="#1A1A1A">Twilio</text>
+      <text x="210" y="177" text-anchor="middle" font-size="12" fill="#76756F">SMS line</text>
+      <!-- worker -->
+      <rect x="290" y="40" width="230" height="250" rx="14" fill="#EEF3F8" stroke="#1F4E79" stroke-width="1.5"/>
+      <text x="405" y="66" text-anchor="middle" font-size="14" font-weight="800" fill="#1F4E79">Cloudflare Worker</text>
+      <rect x="306" y="80" width="194" height="44" rx="9" fill="#fff" stroke="#E5E4DD"/>
+      <text x="405" y="100" text-anchor="middle" font-size="12.5" font-weight="700" fill="#1A1A1A">Router + coordinator</text>
+      <text x="405" y="116" text-anchor="middle" font-size="11" fill="#76756F">one sign-up at a time, queued events</text>
+      <rect x="306" y="134" width="194" height="56" rx="9" fill="#fff" stroke="#1F4E79"/>
+      <text x="405" y="155" text-anchor="middle" font-size="12.5" font-weight="700" fill="#1A1A1A">Tool endpoint + guards</text>
+      <text x="405" y="171" text-anchor="middle" font-size="11" fill="#76756F">state machine · allowlist · limits</text>
+      <text x="405" y="184" text-anchor="middle" font-size="11" fill="#76756F">every call logged, refusals too</text>
+      <rect x="306" y="200" width="194" height="36" rx="9" fill="#fff" stroke="#E5E4DD"/>
+      <text x="405" y="223" text-anchor="middle" font-size="12.5" font-weight="700" fill="#1A1A1A">Model proxy (holds the API key)</text>
+      <rect x="306" y="244" width="194" height="34" rx="9" fill="#fff" stroke="#E5E4DD"/>
+      <text x="405" y="266" text-anchor="middle" font-size="12.5" font-weight="700" fill="#1A1A1A">D1 database · admin dashboard</text>
+      <!-- container -->
+      <rect x="560" y="40" width="190" height="110" rx="14" fill="#fff" stroke="#E5E4DD"/>
+      <text x="655" y="66" text-anchor="middle" font-size="14" font-weight="800" fill="#1A1A1A">Agent container</text>
+      <text x="655" y="88" text-anchor="middle" font-size="12" fill="#44433F">Claude Agent SDK (Haiku)</text>
+      <text x="655" y="106" text-anchor="middle" font-size="12" fill="#44433F">10 MCP tools, nothing else</text>
+      <text x="655" y="124" text-anchor="middle" font-size="12" fill="#44433F">no secrets · run token only</text>
+      <text x="655" y="140" text-anchor="middle" font-size="11" fill="#76756F">60 s cap · max 10 turns</text>
+      <!-- outside services -->
+      <rect x="560" y="180" width="190" height="110" rx="14" fill="#F5F4EE" stroke="#E5E4DD"/>
+      <text x="655" y="206" text-anchor="middle" font-size="14" font-weight="800" fill="#1A1A1A">Real-world actions</text>
+      <text x="655" y="228" text-anchor="middle" font-size="12" fill="#44433F">Stripe payment link + webhook</text>
+      <text x="655" y="246" text-anchor="middle" font-size="12" fill="#44433F">Buy number (after owner's YES)</text>
+      <text x="655" y="264" text-anchor="middle" font-size="12" fill="#44433F">Forwarding test call · go-live</text>
+      <!-- arrows -->
+      <line x1="130" y1="162" x2="158" y2="162" stroke="#76756F" stroke-width="1.5" marker-end="url(#a)"/>
+      <line x1="260" y1="162" x2="288" y2="162" stroke="#76756F" stroke-width="1.5" marker-end="url(#a)"/>
+      <line x1="506" y1="98" x2="558" y2="86" stroke="#76756F" stroke-width="1.5" marker-end="url(#a)"/>
+      <text x="532" y="80" text-anchor="middle" font-size="10.5" fill="#76756F">wake</text>
+      <line x1="558" y1="118" x2="506" y2="158" stroke="#1F4E79" stroke-width="1.5" marker-end="url(#a)"/>
+      <text x="548" y="148" text-anchor="middle" font-size="10.5" fill="#1F4E79">tool calls</text>
+      <line x1="504" y1="176" x2="558" y2="222" stroke="#76756F" stroke-width="1.5" marker-end="url(#a)"/>
+      <text x="540" y="234" text-anchor="middle" font-size="10.5" fill="#76756F">if allowed</text>
+    </svg>
+  </div>
+  <p class="caption">The agent container holds no keys. Its tool calls and model calls both go through the Worker using a short-lived run token.</p>
+
+  <h2>Design decisions</h2>
+  <h3>1. A state machine owns the journey</h3>
+  <p>Each sign-up moves through fixed stages: <code>started → details → form_sent → form_done → link_sent → paid →
+    number_pending → number_ready → forwarding_sent → forwarding_ok → live</code>, plus <code>needs_faiz</code> and
+    <code>closed</code>. The allowed next stages are listed in code, and every update is a versioned
+    compare-and-set, so two events arriving at once can't both move the same sign-up. The agent can't send a payment link
+    before the secure form is done, or forwarding steps before a number exists. It doesn't have to remember these rules,
+    because it can't break them.</p>
+
+  <h3>2. Narrow tools, enforced by an allowlist</h3>
+  <p>The agent gets ten purpose-built tools (<code>get_signup</code>, <code>save_details</code>, <code>send_text</code>,
+    <code>create_payment_link</code>, <code>propose_number</code>, and so on), each with a typed schema. Every other
+    capability is denied in <code>canUseTool</code>, including the SDK's built-in file and shell tools. During the build
+    I found that listing tools in <code>allowedTools</code> silently skips the <code>canUseTool</code> check, so the
+    design uses an empty <code>tools</code> list plus the allowlist callback.</p>
+
+  <h3>3. A human approves anything that costs money</h3>
+  <p>The agent can <em>propose</em> a phone number. Only the business owner's YES, sent by text, makes the Worker buy
+    it. Limits sit in code too: at most two texts to the contractor per turn, at most three escalations to a human per
+    day, and every text checked for length and content.</p>
+
+  <h3>4. No secrets in the agent</h3>
+  <p>The container never sees an API key. The Worker mints a short-lived signed run token for each run. The agent uses
+    it to call the tool endpoint and a model proxy, and the proxy adds the real key on the Worker side. If the container
+    were compromised, it would hold nothing worth stealing.</p>
+
+  <h3>5. Observable by default</h3>
+  <p>Every tool call is written to the database with its duration and, when refused, the reason. A private admin
+    dashboard shows sign-ups by stage, the tool-call log and refusals. That's how I check the guardrails are doing
+    their job, not just that the happy path works.</p>
+
+  <h3>6. Safe to ship</h3>
+  <p>The whole feature is behind a flag and off by default. It plugs into the existing text-line Worker through two small
+    hooks, and the existing Nelya regression suite passes with the harness both off and on.</p>
+
+  <h2>Measured, not guessed</h2>
+  <p>Before building the full harness, I ran a one-day spike to check the riskiest assumption: could the Claude Agent SDK,
+    running in a Cloudflare Container, answer a text fast enough? The target was a reply within 60 seconds.
+    A GitHub Actions workflow deployed a throwaway copy, measured 8 cold and warm runs, saved the results and deleted it.</p>
+  <div class="stats">
+    <div class="stat"><p class="n">7–16 s</p><p class="l">End-to-end reply time across 8 runs, against a 60 s target</p></div>
+    <div class="stat"><p class="n">~$0.0003</p><p class="l">Model cost per agent run (Claude Haiku)</p></div>
+    <div class="stat"><p class="n">8 / 8</p><p class="l">Runs that called the right tool first</p></div>
+  </div>
+  <p style="margin-top:14px">The spike also changed the design before any production code existed: the tool-allowlist
+    fix above, loading tools up front to skip an extra round trip, and running container deploys from CI because they
+    need Docker.</p>
+
+  <h2>Testing</h2>
+  <table>
+    <tr><th>Layer</th><th>What it covers</th><th>Result</th></tr>
+    <tr><td>Unit + journey tests</td><td>Every guard proves it refuses; full journeys on a fake database</td><td>44 pass · 98%+ line coverage</td></tr>
+    <tr><td>Local end to end</td><td>A dummy contractor's full sign-up through the real routes, with Stripe and Twilio faked</td><td>28 / 28</td></tr>
+    <tr><td>Regression</td><td>The existing Nelya front-desk suite, with the harness off and on</td><td>54 / 54 both ways</td></tr>
+    <tr><td>Live spike</td><td>The real agent in a real container with real model calls</td><td>Reply time and cost targets met</td></tr>
+  </table>
+  <p style="margin-top:14px">All test data is fictional. The tests were written first, from the design's requirements.</p>
+
+  <h2>How it was built</h2>
+  <p>I ran this the way I'd run an enterprise program, with an AI team. An <strong>Architect</strong> agent wrote the
+    requirements, high-level and low-level designs. A <strong>Tester</strong> agent reviewed the design and found eleven
+    issues before any code was written. A <strong>Developer</strong> agent built it test-first. I owned the scope, the
+    trade-offs, the approvals and the go/no-go at each gate. The program discipline from my enterprise years is what
+    kept AI-written code shippable.</p>
+
+  <h2>What's next</h2>
+  <ul>
+    <li><strong>Staging deploy:</strong> a separate Worker and database, Twilio in test mode, the real agent and dummy data, followed by a Tester agent pass.</li>
+    <li><strong>Pilot</strong> with one contractor, then production.</li>
+    <li><strong>An eval harness:</strong> a fixed set of sign-up conversations scored automatically on every prompt or model change, so improvements are measured instead of guessed.</li>
+  </ul>
+
+  <div class="note"><p>The source is private because it's part of a live commercial product. I'm happy to walk through the code,
+    the design documents and the test results in an interview.</p></div>
+
+  <footer>
+    <p><a href="../">← Back to portfolio</a> · <a href="https://divoit.com/">divoit.com</a> ·
+      <a href="https://linkedin.com/in/faizhusseinkhan">LinkedIn</a> · <a href="mailto:er.faiz.khan@gmail.com">er.faiz.khan@gmail.com</a></p>
+  </footer>
+</main>
+</body>
+</html>
